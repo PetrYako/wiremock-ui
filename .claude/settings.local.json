@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:/Users/yakov/WebstormProjects/wiremock-ui\" && npm install 2>&1)",
+      "Bash(cd \"C:/Users/yakov/WebstormProjects/wiremock-ui\" && npx tsc -p tsconfig.app.json --noEmit 2>&1)",
+      "Bash(cd \"C:/Users/yakov/WebstormProjects/wiremock-ui\" && npx tsc -p tsconfig.node.json --noEmit 2>&1)",
+      "Bash(cd /c/Users/yakov/WebstormProjects/wiremock-ui && npx tsc --noEmit 2>&1)",
+      "Bash(echo EXIT: $?:*)",
+      "Bash(cd /c/Users/yakov/WebstormProjects/wiremock-ui && npx tsc --project tsconfig.app.json --noEmit 2>&1)"
+    ]
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true
+  }
+}

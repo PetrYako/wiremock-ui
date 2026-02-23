@@ -1,0 +1,352 @@
+/* ── Layout ──────────────────────────────────── */
+
+.mappings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Toolbar ─────────────────────────────────── */
+
+.mappings-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 0 14px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 0;
+}
+
+.mappings-count {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+/* ── Table ───────────────────────────────────── */
+
+.mappings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.mappings-table thead tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.mappings-table th {
+  padding: 16px 18px;
+  text-align: left;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  background: transparent;
+}
+
+.mappings-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+.mappings-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.mappings-table tbody tr {
+  transition: background 0.1s;
+  cursor: pointer;
+}
+
+.mappings-table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.mappings-table tbody tr:hover td:first-child {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.row-selected-mapping {
+  background: var(--accent-dim) !important;
+}
+
+.row-selected-mapping td:first-child {
+  box-shadow: inset 2px 0 0 var(--accent) !important;
+}
+
+/* ── Cell variants ───────────────────────────── */
+
+.url-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  max-width: 580px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.url-pattern {
+  font-style: italic;
+}
+
+.url-pattern-prefix {
+  color: var(--text-dim);
+  margin-right: 2px;
+}
+
+/* ── Status coloring ─────────────────────────── */
+
+.mapping-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+}
+
+.status-2xx { color: #34d399; }
+.status-3xx { color: #22d3ee; }
+.status-4xx { color: #fb923c; }
+.status-5xx { color: #f87171; }
+
+/* ── New Mapping button ──────────────────────── */
+
+.btn-new-mapping {
+  padding: 4px 11px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-new-mapping:hover {
+  opacity: 0.85;
+}
+
+/* ── Checkbox column ─────────────────────────── */
+
+.mappings-table .col-check {
+  width: 40px;
+  min-width: 40px;
+  padding: 0 6px 0 14px;
+  white-space: nowrap;
+}
+
+.mappings-table .col-check input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+}
+
+/* ── Checked row ─────────────────────────────── */
+
+.row-checked {
+  background: var(--accent-dim);
+}
+
+/* ── Delete selected button ──────────────────── */
+
+.btn-delete-selected {
+  padding: 4px 11px;
+  background: none;
+  border: 1px solid var(--delete);
+  border-radius: 5px;
+  color: var(--delete);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-delete-selected:not(:disabled):hover {
+  background: var(--delete);
+  color: #fff;
+}
+
+.btn-delete-selected:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.bulk-confirm-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.bulk-delete-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.btn-bulk-delete-confirm {
+  padding: 4px 12px;
+  background: var(--delete);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-bulk-delete-confirm:not(:disabled):hover { opacity: 0.85; }
+.btn-bulk-delete-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-bulk-delete-cancel {
+  padding: 4px 12px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-bulk-delete-cancel:hover { color: var(--text); border-color: var(--text-dim); }
+.btn-bulk-delete-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Row actions ─────────────────────────────── */
+
+.row-actions-cell {
+  width: 1%;
+  white-space: nowrap;
+  padding: 0 12px 0 4px;
+  text-align: right;
+}
+
+.btn-row-delete {
+  background: none;
+  border: none;
+  color: var(--delete);
+  cursor: pointer;
+  font-size: 0.78rem;
+  padding: 3px 6px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.mappings-table tbody tr:hover .btn-row-delete {
+  opacity: 0.5;
+}
+
+.mappings-table tbody tr:hover .btn-row-delete:hover {
+  opacity: 1;
+  background: var(--surface-3);
+}
+
+.row-delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.row-delete-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.btn-row-delete-confirm {
+  padding: 3px 8px;
+  background: var(--delete);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-row-delete-confirm:not(:disabled):hover { opacity: 0.85; }
+.btn-row-delete-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-row-delete-cancel {
+  padding: 3px 8px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-row-delete-cancel:hover { color: var(--text); border-color: var(--text-dim); }
+.btn-row-delete-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Import / Export buttons ─────────────────── */
+
+.btn-import-mappings {
+  padding: 4px 11px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.btn-import-mappings:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+.btn-import-mappings:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-export-selected {
+  padding: 4px 11px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.btn-export-selected:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+/* ── Light theme overrides ───────────────────── */
+
+[data-theme="light"] .status-2xx { color: #15803d; }
+[data-theme="light"] .status-3xx { color: #0e7490; }
+[data-theme="light"] .status-4xx { color: #c2410c; }
+[data-theme="light"] .status-5xx { color: #dc2626; }
+
+[data-theme="light"] .btn-new-mapping { color: #fff; }

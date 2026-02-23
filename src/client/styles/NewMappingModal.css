@@ -1,0 +1,377 @@
+/* ── Backdrop ─────────────────────────────────── */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* ── Panel ───────────────────────────────────── */
+
+.modal-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 301;
+  width: 600px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* ── Header ──────────────────────────────────── */
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── Form ────────────────────────────────────── */
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+/* ── Field rows ──────────────────────────────── */
+
+.modal-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-field-column {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.modal-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  min-width: 72px;
+  flex-shrink: 0;
+}
+
+.modal-optional {
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+/* ── Input ───────────────────────────────────── */
+
+.modal-input {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.modal-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+.modal-input-short {
+  flex: 0 0 90px;
+  width: 90px;
+}
+
+.modal-field-column .modal-input-short {
+  flex: none;
+}
+
+.input-invalid {
+  border-color: var(--delete);
+}
+
+/* ── Select ──────────────────────────────────── */
+
+.modal-select {
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--surface-2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  padding: 6px 30px 6px 10px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.modal-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+/* ── Textarea ────────────────────────────────── */
+
+.modal-textarea {
+  width: 100%;
+}
+
+/* ── Actions ─────────────────────────────────── */
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* ── Error ───────────────────────────────────── */
+
+.modal-error {
+  margin: 0 18px;
+}
+
+/* ── Advanced toggle ─────────────────────────── */
+
+.advanced-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.advanced-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+
+.advanced-toggle:hover .advanced-label {
+  color: var(--text);
+}
+
+.advanced-chevron {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  transition: transform 0.15s, color 0.15s;
+  display: inline-block;
+}
+
+.advanced-chevron-open {
+  transform: rotate(90deg);
+}
+
+.advanced-toggle:hover .advanced-chevron {
+  color: var(--text);
+}
+
+/* ── Advanced section ────────────────────────── */
+
+.advanced-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-key-input {
+  flex: 2;
+}
+
+.header-value-input {
+  flex: 3;
+}
+
+.btn-remove-header {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-remove-header:hover {
+  color: var(--delete);
+  background: rgba(255, 80, 80, 0.08);
+}
+
+.btn-add-header {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-add-header:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.field-hint {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-top: -2px;
+}
+
+/* ── Status presets ──────────────────────────── */
+
+.status-presets-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.btn-status-preset {
+  padding: 4px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.btn-status-preset:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.btn-status-preset.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* ── Checkbox ───────────────────────────────── */
+
+.modal-field-inline {
+  display: flex;
+  gap: 16px;
+}
+
+.field-hint-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.field-hint-link:hover {
+  text-decoration: underline;
+}
+
+.modal-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
+.modal-checkbox-label input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+/* ── Body patterns ───────────────────────────── */
+
+.body-pattern-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+}
+
+.body-pattern-select {
+  flex: 0 0 150px;
+  width: 150px;
+}
+
+.body-pattern-textarea {
+  flex: 1;
+  resize: vertical;
+}
+
+/* ── Light theme ─────────────────────────────── */
+
+[data-theme="light"] .modal-backdrop {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .modal-panel {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="light"] .modal-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
