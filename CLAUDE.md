@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WireMock UI is a web dashboard for inspecting recorded HTTP requests and managing stub mappings across one or more running WireMock instances. It consists of an Express proxy server and a React/Vite frontend.
+WireMock UI is a web dashboard for inspecting recorded HTTP requests and managing stub mappings across one or more running WireMock instances. It is a pure Vite + React frontend that connects directly to WireMock.
 
 ## Commands
 
@@ -12,51 +12,27 @@ WireMock UI is a web dashboard for inspecting recorded HTTP requests and managin
 # Install dependencies
 npm install
 
-# Development (runs both server and client concurrently)
+# Development
 npm run dev
-
-# Run only the Express server (with hot reload via tsx)
-npm run dev:server
 
 # Run only the Vite dev server (frontend)
 npm run dev:client
 
-# Production build (Vite client build + tsc for server)
+# Production build (Vite)
 npm run build
-
-# Run the production server
-npm start
 ```
 
 There is no test runner configured.
 
 ## Architecture
 
-The project has two distinct parts:
-
-### Server (`src/server/index.ts`)
-A single-file Express server that:
-- Reads `WIREMOCK_URLS` from `.env` (comma-separated URLs) and exposes them as named instances
-- Proxies requests to WireMock's `/__admin/requests` and `/__admin/mappings` endpoints to avoid CORS issues
-- In production (`NODE_ENV=production`), serves the Vite-built client from `dist/client/`
-- Runs on port `3001` by default (configurable via `PORT` env var)
-
-**API routes:**
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/api/instances` | List configured WireMock instances |
-| GET | `/api/requests` | Fetch recorded requests (`?instanceId=&limit=`; `?all=true` bypasses limit) |
-| GET | `/api/mappings` | List stub mappings for an instance |
-| POST | `/api/mappings` | Create a new stub mapping |
-| PUT | `/api/mappings/:id` | Update an existing mapping |
-| DELETE | `/api/mappings/:id` | Delete a mapping |
+WireMock UI is a **pure Vite + React frontend** — there is no backend server. The client connects directly to WireMock's `/__admin/*` endpoints from the browser. WireMock instances are configured via the `VITE_WIREMOCK_URLS` env var; instance labels are derived in `App.tsx` using `new URL(url).host`.
 
 ### Client (`src/client/`)
 A React app (no routing) with two tab-based views — **Requests** and **Mappings**:
 - `App.tsx` — root component; fetches instances, manages theme (dark/light), and switches between `'requests'` / `'mappings'` views via tab navigation (resets to requests on instance change)
 - `components/InstanceSwitcher.tsx` — `<select>` to switch between WireMock instances
-- `components/RequestsList.tsx` — polls `/api/requests?instanceId=&limit=` every 3 seconds (always on), renders a table with search/filter and limit selector; clicking a matched request's stub ID opens the MappingDrawer
+- `components/RequestsList.tsx` — polls `/__admin/requests?limit=` every 3 seconds (always on), renders a table with search/filter and limit selector; clicking a matched request's stub ID opens the MappingDrawer
 - `components/RequestDrawer.tsx` — slide-out panel showing full request/response detail (headers, body, match status, stub ID); shows "Create Stub" button for unmatched requests via `onCreateStub` prop
 - `components/MappingsList.tsx` — table of stub mappings with search, bulk select/delete, per-row delete with confirmation, and "New Mapping" button; fetches on mount (no polling)
 - `components/MappingDrawer.tsx` — slide-out panel for a mapping's detail; supports inline response body editing (PUT), delete with confirmation, and optional back button (`onBack` prop) for cross-drawer navigation
@@ -64,30 +40,25 @@ A React app (no routing) with two tab-based views — **Requests** and **Mapping
 - `types.ts` — shared TypeScript interfaces (`WireMockInstance`, `WireMockRequest`, `RequestsResponse`, `WireMockMapping`, `MappingsResponse`, `InitialMappingData`)
 - `styles/` — plain CSS files (no CSS-in-JS or utility framework)
 
-### Dev proxy
-During development, Vite proxies `/api/*` requests to `http://localhost:3001`, so the client always talks to a local URL regardless of environment.
-
 ### Build output
 `npm run build` produces:
 - `dist/client/` — Vite-compiled frontend assets
-- `dist/server/` — tsc-compiled server (entry: `dist/server/index.js`)
 
 ## Configuration
 
-Copy `.env.example` to `.env` and set `WIREMOCK_URLS` to a comma-separated list of WireMock base URLs:
+Copy `.env.example` to `.env` and set `VITE_WIREMOCK_URLS` to a comma-separated list of WireMock base URLs:
 
 ```
-WIREMOCK_URLS=http://localhost:8080,http://localhost:8081
+VITE_WIREMOCK_URLS=http://localhost:8080,http://localhost:8081
 ```
 
-The server derives each instance's `label` from `new URL(url).host`, so labels are automatically the `host:port` of each URL.
+The `VITE_` prefix is required for Vite to expose env vars to the browser.
 
 ## WireMock API Notes
 
-- `/__admin/requests?limit=N` — caps results (UI sends `limit` param; valid values: 20, 50, 100, 200). Pass `?all=true` on the proxy to omit the limit and fetch everything
+- `/__admin/requests?limit=N` — caps results (UI sends `limit` param; valid values: 20, 50, 100, 200). Omit `limit` param to fetch all
 - `loggedDate` is nested at `request.loggedDate` (milliseconds epoch), **not** at the root of the request object
-- Server validates `limit` against an allowlist before forwarding to WireMock
-- `/__admin/mappings` — CRUD for stub mappings; the proxy forwards POST/PUT/DELETE with JSON body as-is
+- `/__admin/mappings` — CRUD for stub mappings; POST/PUT/DELETE with JSON body
 - Mapping request matchers use one of `url`, `urlPath`, `urlPattern`, or `urlPathPattern` (mutually exclusive)
 - `/__admin/requests` response: each request entry has `stubMapping` as an **object** (`{ id, name, ... }`), not a flat `stubMappingId` string
 - `/__admin/mappings/import` returns **200 with empty body** on success — use `response.text()` and only `JSON.parse` if non-empty; calling `response.json()` directly throws "Unexpected end of JSON input"
