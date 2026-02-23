@@ -300,6 +300,34 @@
 .btn-row-delete-cancel:hover { color: var(--text); border-color: var(--text-dim); }
 .btn-row-delete-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.btn-row-clone {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 3px 6px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.mappings-table tbody tr:hover .btn-row-clone {
+  opacity: 0.5;
+}
+
+.mappings-table tbody tr:hover .btn-row-clone:hover {
+  opacity: 1;
+  background: var(--surface-3);
+}
+
+.row-actions-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
 /* ── Import / Export buttons ─────────────────── */
 
 .btn-import-mappings {

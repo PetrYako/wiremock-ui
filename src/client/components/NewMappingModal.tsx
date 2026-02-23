@@ -16,9 +16,10 @@ interface Props {
   onCreated: (mapping: WireMockMapping) => void
   initialData?: InitialMappingData
   editMapping?: WireMockMapping
+  title?: string
 }
 
-export default function NewMappingModal({ open, instanceUrl, onClose, onCreated, initialData, editMapping }: Props) {
+export default function NewMappingModal({ open, instanceUrl, onClose, onCreated, initialData, editMapping, title }: Props) {
   const [method, setMethod] = useState<Method>('GET')
   const [urlMatchType, setUrlMatchType] = useState<UrlMatchType>('url')
   const [urlValue, setUrlValue] = useState('')
@@ -73,9 +74,9 @@ export default function NewMappingModal({ open, instanceUrl, onClose, onCreated,
       setSubmitError(null)
       setResponseHeaders(initialData?.responseHeaders ?? [])
       setBodyPatterns(initialData?.bodyPatterns ?? [])
-      setDelay('')
-      setPriority('')
-      setResponseTemplating(false)
+      setDelay(initialData?.delay != null ? String(initialData.delay) : '')
+      setPriority(initialData?.priority != null ? String(initialData.priority) : '')
+      setResponseTemplating(initialData?.responseTemplating ?? false)
     }
   }, [open])
 
@@ -206,7 +207,7 @@ export default function NewMappingModal({ open, instanceUrl, onClose, onCreated,
       <div className="modal-backdrop" onClick={onClose} />
       <div className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div className="modal-header">
-          <span id="modal-title" className="modal-title">{editMapping ? 'Edit Mapping' : initialData ? 'Create Stub from Request' : 'New Mapping'}</span>
+          <span id="modal-title" className="modal-title">{title ?? (editMapping ? 'Edit Mapping' : initialData ? 'Create Stub from Request' : 'New Mapping')}</span>
           <button className="drawer-close" onClick={onClose}>×</button>
         </div>
         <form className="modal-form" onSubmit={handleSubmit} noValidate>

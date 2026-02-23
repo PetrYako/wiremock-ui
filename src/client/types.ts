@@ -76,4 +76,7 @@ export interface InitialMappingData {
   body?: string
   responseHeaders?: { key: string; value: string }[]
   bodyPatterns?: BodyPattern[]
+  delay?: number
+  priority?: number
+  responseTemplating?: boolean
 }

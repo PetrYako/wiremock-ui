@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { WireMockMapping, MappingsResponse } from '../types.ts'
+import type { WireMockMapping, MappingsResponse, InitialMappingData, BodyPattern, BodyPatternOperator } from '../types.ts'
 import MappingDrawer from './MappingDrawer.tsx'
 import NewMappingModal from './NewMappingModal.tsx'
 import '../styles/RequestsList.css'
@@ -31,6 +31,34 @@ function statusColorClass(status: number): string {
   return ''
 }
 
+function mappingToInitialData(mapping: WireMockMapping): InitialMappingData {
+  const req = mapping.request
+  const urlMatchType: InitialMappingData['urlMatchType'] =
+    req.url != null ? 'url'
+    : req.urlPath != null ? 'urlPath'
+    : req.urlPattern != null ? 'urlPattern'
+    : 'urlPathPattern'
+  const responseHeaders = mapping.response.headers
+    ? Object.entries(mapping.response.headers).map(([key, value]) => ({ key, value }))
+    : []
+  const bodyPatterns: BodyPattern[] = (req.bodyPatterns ?? []).map((p) => {
+    const operator = Object.keys(p)[0] as BodyPatternOperator
+    return { operator, value: String(p[operator]) }
+  })
+  return {
+    method: req.method ?? 'ANY',
+    urlMatchType,
+    urlValue: (req[urlMatchType] as string) ?? '',
+    status: mapping.response.status,
+    body: mapping.response.body ?? '',
+    responseHeaders,
+    bodyPatterns,
+    delay: mapping.response.fixedDelayMilliseconds,
+    priority: mapping.priority,
+    responseTemplating: mapping.response.transformers?.includes('response-template') ?? false,
+  }
+}
+
 interface Props {
   instanceUrl: string
 }
@@ -50,6 +78,7 @@ export default function MappingsList({ instanceUrl }: Props) {
   const [importing, setImporting] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
   const [importResult, setImportResult] = useState<string | null>(null)
+  const [cloneMappingData, setCloneMappingData] = useState<InitialMappingData | null>(null)
 
   const selectAllRef = useRef<HTMLInputElement>(null)
   const importInputRef = useRef<HTMLInputElement>(null)
@@ -412,13 +441,23 @@ export default function MappingsList({ instanceUrl }: Props) {
                           </button>
                         </div>
                       ) : (
-                        <button
-                          className="btn-row-delete"
-                          aria-label="Delete mapping"
-                          onClick={() => { setConfirmingDeleteId(m.id); setSelectedMapping(null) }}
-                        >
-                          ✕
-                        </button>
+                        <div className="row-actions-group">
+                          <button
+                            className="btn-row-clone"
+                            aria-label="Clone mapping"
+                            title="Clone"
+                            onClick={(e) => { e.stopPropagation(); setCloneMappingData(mappingToInitialData(m)) }}
+                          >
+                            ⧉
+                          </button>
+                          <button
+                            className="btn-row-delete"
+                            aria-label="Delete mapping"
+                            onClick={() => { setConfirmingDeleteId(m.id); setSelectedMapping(null) }}
+                          >
+                            ✕
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -451,6 +490,17 @@ export default function MappingsList({ instanceUrl }: Props) {
           setIsNewMappingOpen(false)
         }}
         initialData={{ responseHeaders: [{ key: 'Content-Type', value: 'application/json' }] }}
+      />
+      <NewMappingModal
+        open={cloneMappingData !== null}
+        instanceUrl={instanceUrl}
+        onClose={() => setCloneMappingData(null)}
+        onCreated={(created) => {
+          setMappings((prev) => [created, ...prev])
+          setCloneMappingData(null)
+        }}
+        initialData={cloneMappingData ?? undefined}
+        title="Clone Mapping"
       />
     </div>
   )
