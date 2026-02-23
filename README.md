@@ -2,6 +2,28 @@
 
 A web dashboard for inspecting recorded HTTP requests and managing stub mappings across one or more running WireMock instances.
 
+## Screenshots
+
+**Requests tab** — live log of recorded requests with method, status, and match status at a glance
+
+![Requests page](docs/img/requests_page.png)
+
+**Request detail** — slide-out drawer with full headers, body, response status, and matched stub ID
+
+![Request details](docs/img/request_details.png)
+
+**Mappings tab** — searchable table of all stub mappings with bulk-select and delete
+
+![Mappings page](docs/img/mappings_page.png)
+
+**Mapping detail** — request matchers, response config, and inline editing in one panel
+
+![Mapping details](docs/img/mappings_details.png)
+
+**Create stub** — form-based editor pre-filled from a captured request, with full response control
+
+![Create mapping](docs/img/mappings_create.png)
+
 ## Features
 
 ### Multi-Instance Support
