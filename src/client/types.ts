@@ -59,7 +59,7 @@ export interface WireMockMapping {
     urlPathPattern?: string
     headers?: Record<string, unknown>
     queryParameters?: Record<string, Record<string, string>>
-    bodyPatterns?: Array<Record<string, string>>
+    bodyPatterns?: Array<Record<string, unknown>>
   }
   response: {
     status: number

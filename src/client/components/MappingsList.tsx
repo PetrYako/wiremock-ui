@@ -43,7 +43,8 @@ function mappingToInitialData(mapping: WireMockMapping): InitialMappingData {
     : []
   const bodyPatterns: BodyPattern[] = (req.bodyPatterns ?? []).map((p) => {
     const operator = Object.keys(p)[0] as BodyPatternOperator
-    return { operator, value: String(p[operator]) }
+    const raw = p[operator]
+    return { operator, value: typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2) }
   })
   const queryParameters: QueryParam[] = req.queryParameters
     ? Object.entries(req.queryParameters).map(([key, matcher]) => {

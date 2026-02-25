@@ -64,7 +64,8 @@ export default function NewMappingModal({ open, instanceUrl, onClose, onCreated,
       setBodyPatterns(
         (editMapping.request.bodyPatterns ?? []).map((p) => {
           const operator = Object.keys(p)[0] as BodyPatternOperator
-          return { operator, value: String(p[operator]) }
+          const raw = p[operator]
+          return { operator, value: typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2) }
         })
       )
       setQueryParams(
@@ -127,7 +128,12 @@ export default function NewMappingModal({ open, instanceUrl, onClose, onCreated,
 
     const builtBodyPatterns = bodyPatterns
       .filter((p) => p.value.trim().length > 0)
-      .map((p) => ({ [p.operator]: p.value.trim() }))
+      .map((p) => {
+        const trimmed = p.value.trim()
+        let parsed: unknown = trimmed
+        try { parsed = JSON.parse(trimmed) } catch { /* keep as string */ }
+        return { [p.operator]: parsed }
+      })
 
     const builtQueryParams: Record<string, Record<string, string>> = {}
     for (const qp of queryParams) {
