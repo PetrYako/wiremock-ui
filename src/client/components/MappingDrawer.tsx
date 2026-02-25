@@ -152,6 +152,22 @@ export default function MappingDrawer({ mapping, instanceUrl, onClose, onMapping
                   <span className="drawer-field-key">{urlInfo?.label}</span>
                   <span className="drawer-field-val mono">{urlInfo?.value}</span>
                 </div>
+                {mapping.request.queryParameters && Object.keys(mapping.request.queryParameters).length > 0 && (
+                  <>
+                    <div className="drawer-sub-title">Query Parameters</div>
+                    <dl className="drawer-headers-table">
+                      {Object.entries(mapping.request.queryParameters).map(([param, matcher]) => {
+                        const op = Object.keys(matcher)[0]
+                        return (
+                          <div key={param} className="drawer-header-row">
+                            <dt>{param}</dt>
+                            <dd>{op}: {matcher[op]}</dd>
+                          </div>
+                        )
+                      })}
+                    </dl>
+                  </>
+                )}
                 {mapping.request.bodyPatterns && mapping.request.bodyPatterns.length > 0 && (
                   <>
                     <div className="drawer-sub-title">Body Patterns</div>

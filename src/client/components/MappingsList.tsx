@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { WireMockMapping, MappingsResponse, InitialMappingData, BodyPattern, BodyPatternOperator } from '../types.ts'
+import type { WireMockMapping, MappingsResponse, InitialMappingData, BodyPattern, BodyPatternOperator, QueryParam, QueryParamOperator } from '../types.ts'
 import MappingDrawer from './MappingDrawer.tsx'
 import NewMappingModal from './NewMappingModal.tsx'
 import '../styles/RequestsList.css'
@@ -45,6 +45,12 @@ function mappingToInitialData(mapping: WireMockMapping): InitialMappingData {
     const operator = Object.keys(p)[0] as BodyPatternOperator
     return { operator, value: String(p[operator]) }
   })
+  const queryParameters: QueryParam[] = req.queryParameters
+    ? Object.entries(req.queryParameters).map(([key, matcher]) => {
+        const operator = Object.keys(matcher)[0] as QueryParamOperator
+        return { key, operator, value: String(matcher[operator]) }
+      })
+    : []
   return {
     method: req.method ?? 'ANY',
     urlMatchType,
@@ -53,6 +59,7 @@ function mappingToInitialData(mapping: WireMockMapping): InitialMappingData {
     body: mapping.response.body ?? '',
     responseHeaders,
     bodyPatterns,
+    queryParameters,
     delay: mapping.response.fixedDelayMilliseconds,
     priority: mapping.priority,
     responseTemplating: mapping.response.transformers?.includes('response-template') ?? false,

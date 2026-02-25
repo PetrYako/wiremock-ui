@@ -41,6 +41,14 @@ export interface BodyPattern {
   value: string
 }
 
+export type QueryParamOperator = 'equalTo' | 'contains' | 'matches' | 'doesNotMatch'
+
+export interface QueryParam {
+  key: string
+  operator: QueryParamOperator
+  value: string
+}
+
 export interface WireMockMapping {
   id: string
   request: {
@@ -50,6 +58,7 @@ export interface WireMockMapping {
     urlPath?: string
     urlPathPattern?: string
     headers?: Record<string, unknown>
+    queryParameters?: Record<string, Record<string, string>>
     bodyPatterns?: Array<Record<string, string>>
   }
   response: {
@@ -76,6 +85,7 @@ export interface InitialMappingData {
   body?: string
   responseHeaders?: { key: string; value: string }[]
   bodyPatterns?: BodyPattern[]
+  queryParameters?: QueryParam[]
   delay?: number
   priority?: number
   responseTemplating?: boolean

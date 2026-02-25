@@ -343,6 +343,28 @@
   cursor: pointer;
 }
 
+/* ── Query parameters ────────────────────────── */
+
+.query-param-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.query-param-key-input {
+  flex: 2;
+}
+
+.query-param-operator-select {
+  flex: 0 0 140px;
+  width: 140px;
+}
+
+.query-param-value-input {
+  flex: 3;
+}
+
 /* ── Body patterns ───────────────────────────── */
 
 .body-pattern-row {

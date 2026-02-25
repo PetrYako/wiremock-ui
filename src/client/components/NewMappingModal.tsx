@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { WireMockMapping, InitialMappingData, BodyPattern, BodyPatternOperator } from '../types.ts'
+import type { WireMockMapping, InitialMappingData, BodyPattern, BodyPatternOperator, QueryParam, QueryParamOperator } from '../types.ts'
 import '../styles/NewMappingModal.css'
 
 type Method = 'ANY' | 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
@@ -7,6 +7,10 @@ type UrlMatchType = 'url' | 'urlPath' | 'urlPattern' | 'urlPathPattern'
 
 const BODY_PATTERN_OPERATORS: BodyPatternOperator[] = [
   'equalToJson', 'matchesJsonPath', 'equalTo', 'contains', 'matches',
+]
+
+const QUERY_PARAM_OPERATORS: QueryParamOperator[] = [
+  'equalTo', 'contains', 'matches', 'doesNotMatch',
 ]
 
 interface Props {
@@ -29,6 +33,7 @@ export default function NewMappingModal({ open, instanceUrl, onClose, onCreated,
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const [responseHeaders, setResponseHeaders] = useState<{ key: string; value: string }[]>([])
+  const [queryParams, setQueryParams] = useState<QueryParam[]>([])
   const [bodyPatterns, setBodyPatterns] = useState<BodyPattern[]>([])
   const [delay, setDelay] = useState('')
   const [priority, setPriority] = useState('')
@@ -62,6 +67,14 @@ export default function NewMappingModal({ open, instanceUrl, onClose, onCreated,
           return { operator, value: String(p[operator]) }
         })
       )
+      setQueryParams(
+        editMapping.request.queryParameters
+          ? Object.entries(editMapping.request.queryParameters).map(([key, matcher]) => {
+              const operator = Object.keys(matcher)[0] as QueryParamOperator
+              return { key, operator, value: String(matcher[operator]) }
+            })
+          : []
+      )
       setSubmitting(false)
       setSubmitError(null)
     } else {
@@ -73,6 +86,7 @@ export default function NewMappingModal({ open, instanceUrl, onClose, onCreated,
       setSubmitting(false)
       setSubmitError(null)
       setResponseHeaders(initialData?.responseHeaders ?? [])
+      setQueryParams(initialData?.queryParameters ?? [])
       setBodyPatterns(initialData?.bodyPatterns ?? [])
       setDelay(initialData?.delay != null ? String(initialData.delay) : '')
       setPriority(initialData?.priority != null ? String(initialData.priority) : '')
@@ -115,22 +129,31 @@ export default function NewMappingModal({ open, instanceUrl, onClose, onCreated,
       .filter((p) => p.value.trim().length > 0)
       .map((p) => ({ [p.operator]: p.value.trim() }))
 
+    const builtQueryParams: Record<string, Record<string, string>> = {}
+    for (const qp of queryParams) {
+      const k = qp.key.trim()
+      const v = qp.value.trim()
+      if (k && v) builtQueryParams[k] = { [qp.operator]: v }
+    }
+
     // Build request payload, preserving extra matcher fields (headers, bodyPatterns) when editing
     let requestPayload: Record<string, unknown>
     if (isEdit) {
       const { url: _u, urlPath: _up, urlPattern: _upt, urlPathPattern: _uptp, method: _m,
-              bodyPatterns: _bp, ...restRequest } = editMapping!.request
+              bodyPatterns: _bp, queryParameters: _qp, ...restRequest } = editMapping!.request
       requestPayload = {
         ...restRequest,
         [urlMatchType]: urlValue.trim(),
         ...(method !== 'ANY' && { method }),
         ...(builtBodyPatterns.length > 0 && { bodyPatterns: builtBodyPatterns }),
+        ...(Object.keys(builtQueryParams).length > 0 && { queryParameters: builtQueryParams }),
       }
     } else {
       requestPayload = {
         [urlMatchType]: urlValue.trim(),
         ...(method !== 'ANY' && { method }),
         ...(builtBodyPatterns.length > 0 && { bodyPatterns: builtBodyPatterns }),
+        ...(Object.keys(builtQueryParams).length > 0 && { queryParameters: builtQueryParams }),
       }
     }
 
@@ -200,6 +223,15 @@ export default function NewMappingModal({ open, instanceUrl, onClose, onCreated,
       prev.map((p, i) => (i === idx ? { ...p, [field]: val } : p))
     )
 
+  const addQueryParam = () =>
+    setQueryParams((prev) => [...prev, { key: '', operator: 'equalTo', value: '' }])
+  const removeQueryParam = (idx: number) =>
+    setQueryParams((prev) => prev.filter((_, i) => i !== idx))
+  const updateQueryParam = (idx: number, field: 'key' | 'operator' | 'value', val: string) =>
+    setQueryParams((prev) =>
+      prev.map((p, i) => (i === idx ? { ...p, [field]: val } : p))
+    )
+
   if (!open) return null
 
   return (
@@ -253,6 +285,52 @@ export default function NewMappingModal({ open, instanceUrl, onClose, onCreated,
                 autoFocus
                 spellCheck={false}
               />
+            </div>
+
+            {/* Query Parameters */}
+            <div className="modal-field modal-field-column">
+              <label className="modal-label">
+                Query Parameters <span className="modal-optional">(optional)</span>
+              </label>
+              <span className="field-hint">Match request query parameters</span>
+              {queryParams.map((qp, idx) => (
+                <div className="query-param-row" key={idx}>
+                  <input
+                    type="text"
+                    className="modal-input query-param-key-input"
+                    placeholder="param_name"
+                    value={qp.key}
+                    onChange={(e) => updateQueryParam(idx, 'key', e.target.value)}
+                    spellCheck={false}
+                  />
+                  <select
+                    className="modal-select query-param-operator-select"
+                    value={qp.operator}
+                    onChange={(e) => updateQueryParam(idx, 'operator', e.target.value)}
+                  >
+                    {QUERY_PARAM_OPERATORS.map((op) => (
+                      <option key={op} value={op}>{op}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    className="modal-input query-param-value-input"
+                    placeholder="value"
+                    value={qp.value}
+                    onChange={(e) => updateQueryParam(idx, 'value', e.target.value)}
+                    spellCheck={false}
+                  />
+                  <button
+                    type="button"
+                    className="btn-remove-header"
+                    onClick={() => removeQueryParam(idx)}
+                    title="Remove parameter"
+                  >×</button>
+                </div>
+              ))}
+              <button type="button" className="btn-add-header" onClick={addQueryParam}>
+                + Add parameter
+              </button>
             </div>
 
             {/* Body Patterns */}

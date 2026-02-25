@@ -1,83 +1,99 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
-WireMock UI is a web dashboard for inspecting recorded HTTP requests and managing stub mappings across one or more running WireMock instances. It is a pure Vite + React frontend that connects directly to WireMock.
+WireMock UI — a web dashboard for managing WireMock server instances. Lets you monitor recorded HTTP requests, create/edit/delete stub mappings, import/export mappings as JSON, clone mappings, and switch between multiple WireMock instances. Connects via WireMock's `/__admin/` REST API (requires CORS enabled).
+
+## Tech Stack
+
+- **React 18** with **TypeScript** (strict mode)
+- **Vite** for dev server and builds
+- **Plain CSS** with CSS custom properties for theming (dark/light)
+- **Fetch API** for HTTP — no axios or other HTTP client
+- No state management library — all local component state
+- No router — tab-based navigation within a single page
+
+## Project Structure
+
+```
+src/client/
+├── main.tsx              # Entry point
+├── App.tsx               # Root layout, theme toggle, tab navigation
+├── types.ts              # Shared TypeScript interfaces
+├── components/
+│   ├── InstanceSwitcher.tsx   # Multi-instance dropdown
+│   ├── RequestsList.tsx       # Requests table with polling + filtering
+│   ├── RequestDrawer.tsx      # Request detail slide-out panel
+│   ├── MappingsList.tsx       # Mappings table with bulk ops
+│   ├── MappingDrawer.tsx      # Mapping detail slide-out panel
+│   └── NewMappingModal.tsx    # Create/edit mapping form modal
+└── styles/                    # One CSS file per component
+```
 
 ## Commands
 
 ```bash
-# Install dependencies
-npm install
-
-# Development
-npm run dev
-
-# Run only the Vite dev server (frontend)
-npm run dev:client
-
-# Production build (Vite)
-npm run build
+npm install          # Install dependencies
+npm run dev          # Start Vite dev server (localhost:5173)
+npm run build        # Production build to dist/
 ```
 
-There is no test runner configured.
+## Environment Variables
 
-## Architecture
+- `VITE_WIREMOCK_URLS` — comma-separated WireMock base URLs (required). See `.env.example`.
 
-WireMock UI is a **pure Vite + React frontend** — there is no backend server. The client connects directly to WireMock's `/__admin/*` endpoints from the browser. WireMock instances are configured via the `VITE_WIREMOCK_URLS` env var; instance labels are derived in `App.tsx` using `new URL(url).host`.
+## Code Conventions
 
-### Client (`src/client/`)
-A React app (no routing) with two tab-based views — **Requests** and **Mappings**:
-- `App.tsx` — root component; fetches instances, manages theme (dark/light), and switches between `'requests'` / `'mappings'` views via tab navigation (resets to requests on instance change)
-- `components/InstanceSwitcher.tsx` — `<select>` to switch between WireMock instances
-- `components/RequestsList.tsx` — polls `/__admin/requests?limit=` every 3 seconds (always on), renders a table with search/filter and limit selector; clicking a matched request's stub ID opens the MappingDrawer
-- `components/RequestDrawer.tsx` — slide-out panel showing full request/response detail (headers, body, match status, stub ID); shows "Create Stub" button for unmatched requests via `onCreateStub` prop
-- `components/MappingsList.tsx` — table of stub mappings with search, bulk select/delete, per-row delete with confirmation, and "New Mapping" button; fetches on mount (no polling)
-- `components/MappingDrawer.tsx` — slide-out panel for a mapping's detail; supports inline response body editing (PUT), delete with confirmation, and optional back button (`onBack` prop) for cross-drawer navigation
-- `components/NewMappingModal.tsx` — modal form for creating mappings (method, URL match type, URL value, body patterns, status, response templating toggle, body, response headers, delay, priority — all flat, no collapsible sections). Accepts optional `initialData?: InitialMappingData` prop to pre-fill fields (used for "Create Stub from Request" flow and default headers)
-- `types.ts` — shared TypeScript interfaces (`WireMockInstance`, `WireMockRequest`, `RequestsResponse`, `WireMockMapping`, `MappingsResponse`, `InitialMappingData`)
-- `styles/` — plain CSS files (no CSS-in-JS or utility framework)
+### Naming
+- **Components/Types**: PascalCase (`RequestsList.tsx`, `WireMockRequest`)
+- **Variables/Functions**: camelCase (`fetchRequests`, `selectedRequest`)
+- **CSS classes**: kebab-case (`drawer-panel`, `badge-blue`)
+- **Props interfaces**: named `Props`
 
-### Build output
-`npm run build` produces:
-- `dist/client/` — Vite-compiled frontend assets
+### Imports (ordering)
+1. React imports (`from 'react'`)
+2. Type imports (`import type { ... }`)
+3. Local component imports
+4. CSS imports
 
-## Configuration
+### File Structure Pattern
+1. Utility functions at top of file
+2. Constants (colors, operators, limits)
+3. `Props` interface
+4. Default export functional component using hooks
 
-Copy `.env.example` to `.env` and set `VITE_WIREMOCK_URLS` to a comma-separated list of WireMock base URLs:
+### Component Patterns
+- **Drawers**: Slide-out panels with backdrop, ESC to close, parent-controlled open state
+- **Lists**: Auto-polling with `setInterval` in `useEffect`, client-side filtering, configurable limits
+- **Modals**: `createPortal()` for rendering, supports create and edit modes via `initialData`/`editMapping` props
+- **Bulk operations**: Checkbox select with "Select All" (indeterminate state), bulk delete with confirmation
+- **Cross-drawer navigation**: Request drawer can navigate to matched mapping and back
 
-```
-VITE_WIREMOCK_URLS=http://localhost:8080,http://localhost:8081
-```
+### Event Handlers
+- Named `handleXxx` (e.g., `handleDelete`, `handleSubmit`)
 
-The `VITE_` prefix is required for Vite to expose env vars to the browser.
+### Async / Error Handling
+- `useCallback` for memoized fetch functions
+- Boolean loading flags (`submitting`, `deleting`)
+- `try/catch` around fetch calls, errors stored in state as `string | null`
 
-## WireMock API Notes
+### CSS / Theming
+- CSS variables defined on `:root` (`--bg`, `--surface`, `--text`, `--accent`, etc.)
+- Light theme via `[data-theme="light"]` selector
+- Dark theme is default
 
-- `/__admin/requests?limit=N` — caps results (UI sends `limit` param; valid values: 20, 50, 100, 200). Omit `limit` param to fetch all
-- `loggedDate` is nested at `request.loggedDate` (milliseconds epoch), **not** at the root of the request object
-- `/__admin/mappings` — CRUD for stub mappings; POST/PUT/DELETE with JSON body
-- Mapping request matchers use one of `url`, `urlPath`, `urlPattern`, or `urlPathPattern` (mutually exclusive)
-- `/__admin/requests` response: each request entry has `stubMapping` as an **object** (`{ id, name, ... }`), not a flat `stubMappingId` string
-- `/__admin/mappings/import` returns **200 with empty body** on success — use `response.text()` and only `JSON.parse` if non-empty; calling `response.json()` directly throws "Unexpected end of JSON input"
+## API Endpoints Used
 
-## Design System
+All relative to WireMock base URL + `/__admin/`:
+- `GET /mappings` / `GET /requests` — list
+- `POST /mappings` — create
+- `PUT /mappings/{id}` — update
+- `DELETE /mappings/{id}` — delete
+- `POST /mappings/import` — bulk import
 
-- **Fonts:** `Syne` (header/brand, weight 800), `DM Sans` (UI body), `JetBrains Mono` (URLs, status codes, counts, timestamps) — loaded from Google Fonts in `index.html`
-- **CSS variables:** Defined in `App.css` `:root` (dark, default) and overridden in `[data-theme="light"]`. All component styles use variables — no hardcoded colors except URL-encoded SVGs (see below)
-- **Theme toggle:** `data-theme` attribute on `document.documentElement`; initialised synchronously inside the `useState` callback to prevent flash; persisted to `localStorage`
-- **URL-encoded SVG gotcha:** CSS variables cannot be used inside `url("data:image/svg+xml,...")`. Any SVG icon with a color that needs to change between themes requires a separate `[data-theme="light"] .selector` override with a re-encoded SVG
-- **Accent button text color:** Dark theme accent (`#22d3ee`, bright cyan) needs `color: #000`; light theme accent (`#0891b2`, dark teal) needs `color: #fff`. Always add a `[data-theme="light"]` override when creating accent-colored buttons
-- **`--text-dim` is near-invisible in dark theme:** `--text-dim` (`#253344`) is extremely dark on dark backgrounds. Use `--text-muted` (`#4a6070`) for secondary/hint text that needs to remain readable
-- **Flex-basis in column layouts:** `.modal-input-short` uses `flex: 0 0 90px` which controls width in row flex but becomes height in column flex. Override with `flex: none` inside `.modal-field-column`
-- **Textarea single-line height:** To match a `<textarea>` height to a regular `<input>`, use `rows={1}` and omit `min-height` from CSS — the browser's natural row height aligns with input padding
-- **Reusable list-of-rows UI:** `btn-add-header`, `btn-remove-header`, and `header-row` CSS classes are generic — reuse them for any repeatable field row (e.g. body patterns), not just response headers
-- **Toolbar buttons:** use `padding: 4px 11px`, `border-radius: 5px`, `font-size: 0.75rem`, `font-family: 'DM Sans'` — matching `.btn-refresh`. Avoid rem-based padding or buttons render taller than siblings
-- **Success banner:** `.success-banner` class exists in `App.css` (green, mirrors `.error-banner`) — reuse it for post-action confirmations
+## Key Notes
 
-## React Patterns
-
-- **Stable callback with mutable dependency:** When a `useCallback` should not re-create on every state change (to avoid triggering unrelated effects), store the mutable value in a `useRef` and read `ref.current` inside the callback. E.g. `limitRef` in `RequestsList.tsx` keeps `fetchRequests` stable while still using the current `limit` value
-- **Cross-drawer navigation:** When navigating from one drawer to another (e.g. request → mapping via stub ID click), store the previous selection in a `useRef` so the back button can restore it without re-render churn
+- No ESLint/Prettier config — follow existing code style
+- TypeScript strict mode with no implicit any, no unused variables/parameters
+- Fonts: Syne (headings), DM Sans (body), JetBrains Mono (code) via Google Fonts
+- No backend — purely static frontend that talks directly to WireMock instances
